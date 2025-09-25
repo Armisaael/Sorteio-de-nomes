@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Sorteador de Nomes</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f0f2f5;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+    h1 { color: #333; }
+    textarea {
+        width: 300px;
+        height: 150px;
+        padding: 10px;
+        font-size: 14px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        resize: vertical;
+    }
+    input[type="file"], input[type="number"], button {
+        margin-top: 10px;
+        padding: 10px;
+        font-size: 14px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+    button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        margin-bottom: 20px;
+    }
+    button:hover { background-color: #45a049; }
+    ul { list-style: none; padding: 0; }
+    li {
+        background: #fff;
+        margin: 5px 0;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        font-weight: bold;
+        text-align: center;
+        animation: fadeIn 0.5s ease;
+    }
+    @keyframes fadeIn {
+        from {opacity: 0; transform: translateY(-10px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
+</style>
+</head>
+<body>
+<h1>Sorteador de Nomes</h1>
+
+<h3>Digite os nomes (separados por vírgula ou linha):</h3>
+<textarea id="nameInput"></textarea><br>
+
+<h3>Ou faça upload de um arquivo (.txt ou .csv):</h3>
+<input type="file" id="fileInput" accept=".txt,.csv"><br>
+
+<label for="numSort">Quantos nomes sortear?</label>
+<input type="number" id="numSort" min="1"><br>
+
+<button onclick="sortearNomes()">Sortear</button>
+
+<h2>Resultados:</h2>
+<ul id="result"></ul>
+
+<script>
+function sortearNomes() {
+    const textarea = document.getElementById('nameInput').value.trim();
+    const fileInput = document.getElementById('fileInput').files[0];
+    const numSort = parseInt(document.getElementById('numSort').value);
+    const resultList = document.getElementById('result');
+    resultList.innerHTML = '';
+
+    function mostrarResultado(nomes) {
+        if (numSort > nomes.length) {
+            alert('O número de nomes a sortear é maior que a lista de nomes!');
+            return;
+        }
+        // Animação simples: mostrar nomes piscando antes de escolher
+        let count = 0;
+        const interval = setInterval(() => {
+            resultList.innerHTML = '';
+            const random = nomes[Math.floor(Math.random() * nomes.length)];
+            const li = document.createElement('li');
+            li.textContent = random;
+            resultList.appendChild(li);
+            count++;
+            if (count >= 15) { // dura ~1.5s
+                clearInterval(interval);
+                // mostra nomes finais
+                resultList.innerHTML = '';
+                const shuffled = nomes.sort(() => 0.5 - Math.random());
+                const selecionados = shuffled.slice(0, numSort);
+                selecionados.forEach(nome => {
+                    const liFinal = document.createElement('li');
+                    liFinal.textContent = nome;
+                    resultList.appendChild(liFinal);
+                });
+            }
+        }, 100);
+    }
+
+    if (fileInput) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            const nomes = text.split(/\r?\n|,/).map(n => n.trim()).filter(n => n);
+            mostrarResultado(nomes);
+        };
+        reader.readAsText(fileInput);
+    } else if (textarea) {
+        const nomes = textarea.split(/\r?\n|,/).map(n => n.trim()).filter(n => n);
+        mostrarResultado(nomes);
+    } else {
+        alert('Por favor, digite os nomes ou faça upload de um arquivo!');
+    }
+}
+</script>
+</body>
+</html>
